@@ -1,0 +1,28 @@
+#titleDiv {
+	margin-top: 90px;
+	margin-bottom: -20px;
+}
+
+#mainImg {
+	margin-top: -30px;
+}
+
+#logoutDiv {
+	margin-top: -50px;
+	margin-right: 45px;
+}
+
+#tblSpace {
+	margin-left: 50px;
+}
+
+#topDiv {
+	border: 2px solid #000000;
+	margin-top: -10px;
+	padding: 30px;
+	padding-top: 40px;
+}
+
+#imgDiv {
+	padding: 10px;
+}

@@ -1,0 +1,27 @@
+#h1Div {
+	margin-top: 30px;
+}
+
+.mistake {
+	color: Red;
+}
+
+#lblalert {
+	color: Red;
+}
+
+.delete {
+	background-color: Red;
+}
+
+.save {
+	background-color: LimeGreen;
+}
+
+.tab-pane {
+	border: solid;
+}
+
+.change {
+	background-color: orange;
+}

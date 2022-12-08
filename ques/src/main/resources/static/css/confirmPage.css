@@ -1,0 +1,17 @@
+.firstDiv {
+	display: flex;
+}
+
+#titleDiv {
+	margin-left: 80px;
+	width: 85%;
+}
+
+#contentDiv, #userInfoQuestion {
+	margin-left: 200px;
+	margin-bottom: 20px;
+}
+
+#btnSpace {
+	margin-right: 110px;
+}

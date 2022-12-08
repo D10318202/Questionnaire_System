@@ -1,0 +1,324 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>動態問卷後台 - 新增問卷</title>
+<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+<link rel="stylesheet" th:href="@{/css/backAddquestionnaire.css}" />
+<script th:src="@{/js/jquery-3.6.0.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/backAddquestionnaire.js}"></script>
+<script th:inline="javascript">
+	var message = /*[[${quesErrorMsg}]]*/"";
+	if (message != null)
+		alert(message);
+
+	$(document).ready(function() {
+		var questionnaireSession = '[[${session.questionnaire}]]';
+		var totalanswers = sessionStorage.getItem("totalanswers");
+
+		if (questionnaireSession !== 'null') {
+			$('#Link-Questionnaire-tab').removeClass('active');
+			$('#formQuestionnaire').removeClass('active show');
+
+			$('#Link-Questions-tab').addClass('active');
+			$('#formQuestions').addClass('active show');
+		}
+		
+		if(totalanswers !== null){
+  	 	    $('#Link-Questionnaire-tab').removeClass('active');
+		 	$('#formQuestionnaire').removeClass('active show');
+		 	
+		 	$('#Link-Total-tab').addClass('active');
+			$('#formTotal').addClass('active show');
+			
+			sessionStorage.removeItem('totalanswers');
+		}
+
+        $(".editQuestion").click(function (){
+        	var count = $(this).attr("name");
+        	
+        	$.ajax({
+        		url: "/loadEditQuestion/"+count,
+        		type: "GET",
+        		dataType: 'json',
+        		sucess: function(result){
+        			if(result !== null){
+        				$("#title").val(result.questionTitle);
+        				$("#selectType").val(result.questionType);
+        				if(result.mustKeyin == 'on'){
+        					$("#Must").prop("checked", true);
+        			    }else{
+        			    	$("#Must").prop("checked", false);
+        			    }
+        				$("#answer").val(result.questionChoices);
+        				
+        				$("#editQuestion").show();
+        				document.getElementById("editQuestion").value= count;
+        				$("#addQuestion").addClass("invisible");        				   
+        			}
+        		 },
+	             error: function (xhr, ajaxOptions, thrownError) {                   	
+	                 alert("Error!!");
+	             }
+        	});
+        })
+	})
+	
+	function back() {
+		$('#formAnswers').addClass('active show');
+		$('#formAnswers-detail').removeClass('active show');
+	}
+	
+	</script>
+</head>
+
+<body>
+	<div th:replace="~{backListPage::header}"></div>
+	<div class="container">
+		<div class="row" id="h1Div">
+			<h1>後台-新增問卷</h1>
+		</div>
+		<div>
+			<div class="col-lg-12">
+				<nav>
+					<div class="nav nav-tabs" id="nav-tab" role="tablist">
+						<a class="nav-link active" id="Link-Questionnaire-tab"
+							data-bs-toggle="tab" data-bs-target="#formQuestionnaire"
+							type="button" role="tab" aria-controls="formQuestionnaire"
+							aria-selected="true" href="#formQuestionnaire">問卷</a> <a
+							class="nav-link" id="Link-Questions-tab" data-bs-toggle="tab"
+							data-bs-target="#formQuestions" type="button" role="tab"
+							aria-controls="formQuestions" aria-selected="true"
+							href="#formQuestions">問題</a> <a class="nav-link"
+							id="Link-Answers-tab" data-bs-toggle="tab"
+							data-bs-target="#formAnswers" type="button" role="tab"
+							aria-controls="formAnswers" aria-selected="true"
+							href="#formAnswers">填寫資料</a> <a class="nav-link"
+							id="Link-Total-tab" data-bs-toggle="tab"
+							data-bs-target="#formTotal" type="button" role="tab"
+							aria-controls="formTotal" aria-selected="true" href="#formTotal">統計</a>
+					</div>
+				</nav>
+				<form th:action="@{/backAddquestionnaire}" method="post"
+					th:object="${questionnaireList}">
+					<div class="tab-content" id="nav-tabContent">
+						<!-- 問卷頁籤 -->
+						<div class="tab-pane fade active show" id="formQuestionnaire"
+							role="tabpanel" aria-labelledby="Link-Questionnaire-tab">
+							<p>有標示(*)為必填欄位</p>
+							<div class="questitle">
+								*問卷名稱: <input type="text" id="txtTitle" th:name="title"
+									th:if="${changeques} ==null" /> <input type="text"
+									id="txtTitle" th:name="title" th:unless="${changeques} ==null"
+									th:value="${changeques.questionnaireTitle}" />&emsp;*問卷名稱至少要有五個字*
+							</div>
+							<br />
+							<div class="quesbody">
+								*描述內容: <input type="text" id="txtBody" th:name="body"
+									th:if="${changeques} ==null" /> <input type="text"
+									id="txtBody" th:name="body" th:unless="${changeques} ==null"
+									th:value="${changeques.questionnaireBody}" />&emsp;*問卷內容至少要有二十個字*
+							</div>
+							<br />
+							<div class="quesstart">
+								*開始時間: <input type="date" id="txtStart" th:name="startDate"
+									th:if="${changeques} ==null"
+									th:value="${#dates.format(new java.util.Date().getTime(), 'yyyy-MM-dd')}" />
+								<input type="date" id="txtStart" th:name="startDate"
+									th:unless="${changeques} ==null"
+									th:value="${#dates.format(changeques.startDate, 'yyyy-MM-dd')}" />&emsp;*開始時間不能早於今天*
+							</div>
+							<br />
+							<div class="quesend">
+								*結束時間: <input type="date" id="txtEnd" th:name="endDate"
+									th:if="${changeques} ==null" /> <input type="date" id="txtEnd"
+									th:name="endDate" th:unless="${changeques} ==null"
+									th:value="${#dates.format(changeques.endDate, 'yyyy-MM-dd')}" />&emsp;*結束時間不能早於開始時間*
+							</div>
+							<br /> <label for="checUse">*已啟用</label> <input type="checkbox"
+								id="checUse" checked="checked" th:name="state" /><br /> <br />
+							<label ID="mistake" th:text="${errorMsg}" style="color: red"
+								visible="false"></label> <br /> <br />
+							<button id="cancle" type="reset"
+								onClick="window.location.href='/backListPage'" class="delete">取消</button>
+							&emsp;&emsp;
+							<button type="submit" th:if="${changeques} == null" class="save">送出</button>
+							<button type="submit" th:unless="${changeques} == null"
+								class="save" th:name="createq">編輯</button>
+						</div>
+						<!-- 問卷頁籤結束 -->
+						<!-- 問題頁籤 -->
+						<div class="tab-pane fade" id="formQuestions" role="tabpanel"
+							aria-labelledby="Link-Questions-tab">
+							<div>
+								<label>種類: </label> <select class="form-select"
+									id="selectOftenUse" onchange="select()">
+									<option selected="selected" value="0">自訂問題</option>
+									<option th:each="OftenUseQues: ${oftenUseQues}"
+										th:value="${OftenUseQues.Id}" th:text="${OftenUseQues.Title}"></option>
+								</select> <br />
+							</div>
+							<div>
+								<label>問題: </label> <input type="text" id="title"
+									th:name="questionTitle" />&nbsp; <select id="selectType"
+									th:name="questionType">
+									<option value="0">單選方塊</option>
+									<option value="1">複選方塊</option>
+									<option value="2">文字方塊</option>
+								</select> &emsp;*問題至少要有三個字*<br /> <br />
+							</div>
+							<div>
+								<label>回答: </label> <input type="text" id="answer"
+									th:name="questionChoices" />&nbsp;*多個答案以;分隔*
+								<button type="submit" class="save" th:name="add" id="addQuestion">加入</button>
+								<button type="submit" class="change" th:name="editQuestion" id="editQuestion" style="display:none;">編輯</button>
+								<br /> <br />
+							</div>
+							<div>
+								<label for="Must">必填項目:</label> <input type="checkbox" id="Must"
+									checked="checked" th:name="mustKeyin" /><br />
+							</div>
+							<br /> <label ID="mistake" th:text="${ErrorMsg}" class="mistake"
+								visible="false"></label> <br />
+							<button id="btnDelete" type="submit" class="delete" th:name="remove"
+								onclick="ConfirmDelete()">刪除</button>
+							<br />
+							<table class="table table-striped table-hover">
+								<tr>
+									<th></th>
+									<th>#</th>
+									<th>問題</th>
+									<th>種類</th>
+									<th>必填</th>
+									<th></th>
+								</tr>
+								<tr th:each="questions, status: ${session.questions}">
+									<td><input type="checkbox"
+										th:if="${questions.questionId} == 0"
+										th:value="${status.index}" th:name="index" /> <input
+										type="checkbox" th:unless="${questions.questionId} == 0"
+										th:value="${questions.questionId}" th:name="Id" /></td>
+									<td><span ID="hfquesDetailID" th:text="${status.count}"></span>
+									</td>
+									<td><label id="lblquesDetailTitle"
+										th:text="${questions.questionTitle}"></label></td>
+									<td><label id="lblquesDetailType"
+										th:text="${questions.questionType}"></label></td>
+									<td><input type="checkbox" id="ckbListUse"
+										disabled="disabled" checked="checked"
+										th:checked="${questions.mustKeyin}" /></td>
+									<td><a th:text="編輯" class="editQuestion" th:name="${status.count}"></a></td>
+								</tr>
+							</table>
+							<button id="btnquescancle" type="reset"
+								onClick="window.location.href='/backListPage';" class="cancle">取消</button>
+							&emsp;&emsp;
+							<button type="submit" class="create" th:if="${changeques} == null"
+								th:name="createquestion">送出</button>
+							<button type="submit" class="save"
+								th:unless="${changeques} == null" th:name="editquestion">修改</button>
+						</div>
+						<!-- 問題頁籤結束 -->
+						<!-- 填寫資料頁籤 -->
+						<div class="tab-pane fade" id="formAnswers" role="tabpanel"
+							aria-labelledby="Link-Answers-tab">
+							<a class="btn btn-primary" th:if="${useranswers != null}" th:href="@{/answerlisttoCSV}">匯出(.CSV)</a> <br /> <br />
+						    <div th:if="${useranswers} != null">
+							<table class="table table-success table-hover">
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>姓名</th>
+										<th>填寫時間</th>
+										<th>觀看細節</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="user,status : ${useranswers}">
+										<td><label id="lblNumber" th:text="${status.count}"></label></td>
+										<td><label id="ltlName" th:text="${user.name}"></label></td>
+										<td><label id="ltlTime"
+											th:text="${#dates.format(user.createDate, 'yyyy-MM-dd')}"></label></td>
+										<td>
+										  <a class="btn btn-dark detail" th:id="${user.userId}">前往</a>								
+							           </td>
+									</tr>
+								</tbody>
+							</table>
+							</div>
+							<div th:unless="${useranswers} != null">
+							   <table class="table table-success table-hover">
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>姓名</th>
+										<th>填寫時間</th>
+										<th>觀看細節</th>
+									</tr>
+								</thead>
+								<tbody>	
+									<tr>
+										<td class="text-center" colspan="4">--尚未有人填寫問卷--</td>
+									</tr>
+								</tbody>
+							</table>
+							</div>
+						</div>
+						<div class="tab-pane fade" id="formAnswers-detail" role="tabpanel" aria-labelledby="Link-Answers-tab">
+							 <fieldset disabled>
+							   <div>
+								 <p>有標示(*)為必填欄位</p>
+								 <span>*姓名: </span> 
+								 <input type="text" id="txtname" placeholder="輸入姓名" th:name="txtname" />
+							   </div>
+							   <br />
+							   <div>								
+							     <span>*手機號碼: </span>
+								 <input type="tel" id="txtphone" placeholder="輸入手機號碼" th:name="txtphone"/>
+							   </div>
+							   <br />							   
+							   <div>
+                                 <span>*E-mail: </span>
+                                 <input type="email" id="txtemail" placeholder="輸入信箱" th:name="txtemail"/>
+                               </div>
+                               <br />
+							   <div>
+								 <span>*年齡: </span>
+								 <input type="number" id="txtage" placeholder="輸入年齡" th:name="txtage"/>
+							   </div>
+							   <br />                               
+							   <div>
+									<small id="txtTime" th:name="txtTime"></small>
+							   </div>
+								<hr class="invisible" />
+								<div id="questionnaireInfo">
+								</div>
+							</fieldset>							
+							<button type="button" onclick="back()" class="btn btn-outline-dark">返回</button>
+						</div>
+						<!-- 填寫資料頁籤結束 -->
+						<!-- 統計頁籤 -->
+						<div class="tab-pane fade" id="formTotal" role="tabpanel"
+							aria-labelledby="Link-Total-tab">
+							<div th:if="${totalanswerVal} != null" th:each="total,status : ${totalanswerVal}">
+							<br/>					
+							    <h5 th:text="${status.count}+'. ' + ${total.title}"></h5>
+                                  <th:block th:each="choices,status : ${total.choicesMap}">
+                                     <p th:text="${choices.getKey()} +' 票數是: ' + ${choices.getValue()}"></p>
+                                  </th:block>
+							</div>
+							<div th:unless="${totalanswerVal} != null">
+								<h5 class="text-center">--目前暫無統計資料--</h5>
+							</div>
+						</div>
+						<!-- 統計頁籤結束 -->
+					</div>
+				</form>
+			</div>
+		</div>
+		<br />
+	</div>
+</body>
+<div th:replace="~{backListPage::footer}"></div>
+</html>

@@ -1,0 +1,14 @@
+server:
+  port: 8094
+
+spring:  
+  datasource:
+    url: jdbc:mysql://localhost:3308/ques
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: mysql
+    show-sql: true

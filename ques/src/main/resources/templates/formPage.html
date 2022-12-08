@@ -1,0 +1,115 @@
+  <!doctype html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<title>動態問卷前台 - 問卷內頁</title>
+	<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+	<link rel="stylesheet" th:href="@{/css/formPage.css}" />
+	<script th:src="@{/js/jquery-3.6.0.js}"></script>
+	<script th:src="@{/js/bootstrap.min.js}"></script>
+	<script th:src="@{/js/formPage.js}"></script>
+	<script th:inline="javascript">
+	var message = /*[[${userInfoErrorMsg}]]*/"";
+	if (message != null)
+		alert(message);
+	</script>
+</head>
+
+<body>
+	<br>
+	<div class="firstDiv col-8">
+		<div id="titleDiv" class="col-2" >
+		   <h1>前台</h1>
+		</div>
+		<div class="col-6">		
+		   <span id="ltlState" th:value="${questionnaires.questionnaireStates}==true ? '投票中': '已完結'"></span><br />
+		   <small th:text="'投票期間為 : ' + ${#dates.format(questionnaires.startDate, 'yyyy-MM-dd')} + '～' + ${#dates.format(questionnaires.endDate, 'yyyy-MM-dd')}"></small>
+	    </div>
+	</div>
+	<div id="contentDiv" class="col-8">
+		<br>
+		<div>
+		   <h2 align="center" th:text="${questionnaires.questionnaireTitle}"></h2><br>
+		</div>
+		<h4 th:text="${questionnaires.questionnaireBody}"></h4>
+		<small>◎ 活動完成後，將會進行抽獎，因此請注意基本資料請留真實資料，以及確認Email和手機號碼是否正確喔！</small>
+	</div>
+	<form th:action="@{/formPage}" method="post">
+	<div id="userInfoQuestion" class="col-8">		
+			<br><br>
+			<span>打 * 號者為必填(或必選)</span><br><br>
+			<div class="form-group">
+				<label>(*)姓名:</label>&emsp;&emsp;
+				<input th:if="${session.userInfo} ==null" type="text" style="width: 250px" id="txtname" th:name="userName" Class="Must" placeholder="王小明" required>
+                <input th:unless="${session.userInfo} ==null" th:value="${session.userInfo.name}" type="text" style="width: 250px;" id="txtname" Class="Must" th:name="userName" placeholder="王小明" required>&emsp;<small>*請輸入中文姓名*</small>
+			</div>
+			<br/>
+			<div class="form-group">
+				<label>(*)手機:</label>&emsp;&emsp;
+				<input th:if="${session.userInfo} ==null" type="tel" style="width: 250px;" id="txtphone" th:name="userPhone" Class="Must" placeholder="0912345678">
+				<input th:unless="${session.userInfo} ==null" th:value="${session.userInfo.phone}" type="tel" style="width: 250px;" id="txtphone" th:name="userPhone" Class="Must" placeholder="0912345678">&emsp;<small>*請輸入10位數字的號碼*</small>
+            </div>
+            <br/>
+			<div class="form-group">
+				<label>(*)Email:</label>&emsp;&nbsp;
+				<input th:if="${session.userInfo} ==null" type="email" style="width: 250px;" id="txtemail" th:name="userEmail" Class="Must" placeholder="dog@yahoo.com.tw">				
+                <input th:unless="${session.userInfo} ==null" th:value="${session.userInfo.email}" type="email" style="width: 250px;" id="txtemail" th:name="userEmail" Class="Must" placeholder="dog@yahoo.com.tw">&emsp;<small>*信箱應該包含@*</small><br>
+			</div>
+			<br/>
+			<div class="form-group">
+				<label>(*)年齡:</label>&emsp;&emsp;
+				<input th:if="${session.userInfo} ==null" type="number" min="10" style="width: 250px;" id="txtage" th:name="userAge" Class="Must" placeholder="25">
+                <input th:unless="${session.userInfo} ==null" th:value="${session.userInfo.age}" type="number" min="10" style="width: 250px;" id="txtage" th:name="userAge" Class="Must" placeholder="25">&emsp;<small>*請輸入介於10~150之間*</small>
+			</div>
+			<label ID="mistake" th:text="${errorMsg}" style="color: red" visible="false"></label>		
+		<hr class="my-4 invisible">
+		<div>
+			<br>
+			<div th:each="question,status : ${questionInfo}">			
+			    <div th:if="${question.mustKeyin}==true"> 
+			       <small style="color: red">(*必填)</small>
+                   <h5 th:text="'第' + ${status.count} + '題 : '+ ${question.questionTitle} + '?'"></h5>
+                   <br>
+                   <input type="radio" th:if ="${question.questionType}==0" th:name="${status.index}" 
+                     th:each="quesAnswer,ansStatus:${#strings.arraySplit(question.questionChoices, ';')}" 
+                     th:text="${quesAnswer}" th:value="${quesAnswer}" class="inputRadio" 
+                     th:id="${question.questionNumber}">
+                   <input type="checkbox" th:if ="${question.questionType}==1" th:name="${status.index}" 
+                     th:each="quesAnswer,ansStatus:${#strings.arraySplit(question.questionChoices, ';')}" 
+                     th:text="${quesAnswer}" th:value="${quesAnswer}" class="inputCheck" 
+                     th:id="${question.questionNumber}">
+                   <textarea th:if ="${question.questionType}==2" class="col-2 textArea" placeholder="請在此作答" 
+                     th:id="${question.questionNumber}"></textarea>                  
+                </div>
+                
+                <div th:unless="${question.mustKeyin}==true">
+                   <h5 th:text="'第' + ${status.count} + '題 : '+ ${question.questionTitle} + '?'"></h5>
+                   <br>                
+                   <input type="radio" th:if ="${question.questionType}==0" th:name="${status.index}" 
+                     th:each="quesAnswer,ansStatus:${#strings.arraySplit(question.questionChoices, ';')}" 
+                     th:text="${quesAnswer}" th:value="${quesAnswer}" class="inputRadio" 
+                     th:id="${question.questionNumber}">
+                   <input type="checkbox" th:if ="${question.questionType}==1" th:name="${status.index}" 
+                     th:each="quesAnswer,ansStatus:${#strings.arraySplit(question.questionChoices, ';')}" 
+                     th:text="${quesAnswer}" th:value="${quesAnswer}" class="inputCheck" 
+                     th:id="${question.questionNumber}">
+                   <textarea th:if ="${question.questionType}==2" class="col-2 textArea" placeholder="請在此作答" 
+                     th:id="${question.questionNumber}"></textarea>
+                </div>
+            <hr class="invisible"/>  
+            </div>
+		</div>		
+	</div>
+	<div align="right" id="btnSpace" class="col-2">
+		<div class="col-8">
+			<button type="button" class="btn btn-danger" onClick="window.location.href='/listPage'">取消</button>
+			<button type="submit" class="btn btn-primary btnSubmit" id="btnSubmit">送出</button>
+		</div>
+		<div class="col-1"></div>
+	</div>
+	</form>
+	<script type="text/javascript">
+		
+	</script>
+</body>
+</html>

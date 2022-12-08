@@ -1,0 +1,23 @@
+#tblSpace {
+	margin-left: 50px;
+}
+
+#btnDelete {
+	background-color: Red;
+}
+
+#btnquescancle {
+	background-color: Red;
+}
+
+#btnquessave {
+	background-color: Menu;
+}
+
+#ltlquesmistMsg {
+	color: Red;
+}
+
+#BtnAdd {
+	background-color: LimeGreen;
+}

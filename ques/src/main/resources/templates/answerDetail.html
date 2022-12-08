@@ -1,0 +1,106 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>動態問卷 - 統計頁</title>
+<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+<script th:src="@{/js/jquery-3.6.0.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script th:inline="javascript">
+    const pageUrl = new URL(window.location.href);
+    var questionnaireId = pageUrl.searchParams.get("ID");
+
+	$(document).ready(function() {
+		$.ajax({
+			url: "/loadTotals/"+questionnaireId,
+			type: "GET",
+			dataType: 'json',
+			success: function(totalresult) {
+				drawPieChart(totalresult);
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert("Error!!");
+			}
+		});
+	});
+
+	function drawPieChart(chartInfo) {
+		var each = Highcharts.each, 
+		     $charts = $('#charts');
+		each(chartInfo,function(item, i) {
+		     $charts.append('<div id="container' + i + '"></div>');
+			 var $chart = $('#container' + i);
+			 var dataArray = [];
+
+			 if (item.choicesInfo.length === 0 || item.choicesInfo == null) {
+					var data = [];
+					data.push("此題尚未有人作答", 0);
+					dataArray.push(data);
+			} else {
+				 for (let j = 0; j < item.choicesInfo.length; j++) {
+				   var data = [];
+				   data.push(item.choicesInfo[j].choices,item.choicesInfo[j].count);
+				   dataArray.push(data);
+				 }
+			}
+
+			$chart.highcharts({
+					chart : {
+						plotBackgroundColor : null,
+						plotBorderWidth : null,
+						plotShadow : false,
+						type : 'pie'
+					},
+					title : {
+						text : item.QuestionTitle
+					},
+					tooltip : {
+						pointFormat : '{series.choices}: <b>{point.percentage:.1f}%</b>'
+					},
+					accessibility : {
+						point : {
+							valueSuffix : '%'
+						}
+					},
+					plotOptions : {
+						pie : {
+						  allowPointSelect : true,
+						  cursor : 'pointer',
+						  dataLabels : {
+								enabled : true,
+								format : '<b>{point.choices}</b>: {point.percentage:.1f} %'
+						  }
+						}
+					},
+					credits : {
+						enabled : false
+					},
+					series : [{
+						"choices" : "counts",
+						"data" : dataArray
+				    }]
+			});
+	    });
+	}
+</script>
+</head>
+
+<body>
+ <div class="container">
+	<div>
+		<input type="image" src="Pictures/75470.png" height="79px"
+			width="73px" />|
+		<a href="listPage.html" th:href="@{/listPage}">問卷管理</a>
+	</div>
+	<div id="contentDiv" class="col-12">
+		<br>
+		<div>
+			<h2 align="center" th:text="${questionnaires.questionnaireTitle}"></h2>
+			<br>
+		</div>
+	</div>
+	<div id="charts"></div>
+  </div>
+</body>
+</html>

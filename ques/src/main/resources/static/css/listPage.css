@@ -1,0 +1,33 @@
+#titleDiv {
+	margin-top: 30px;
+}
+
+#mainImg {
+	margin-top: -30px;
+	margin-left: 30px;
+}
+
+#loginDiv {
+	margin-top: 35px;
+	margin-right: 40px;
+	margin-bottom: 10px;
+}
+
+#mainDiv {
+	margin-left: 50px;
+	margin-bottom: 25px;
+}
+
+#topDiv {
+	border: 2px solid #000000;
+	margin: 80px;
+	margin-top: 20px;
+	margin-bottom: -35px;
+	padding: 30px;
+	padding-left: 50px;
+	padding-top: 40px;
+}
+
+#listDiv {
+	margin: 80px;
+}

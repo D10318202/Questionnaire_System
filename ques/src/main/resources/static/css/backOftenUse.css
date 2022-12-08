@@ -1,0 +1,30 @@
+#titleDiv {
+	margin-top: 90px;
+	margin-bottom: -20px;
+}
+
+#tblSpace {
+	margin-left: 50px;
+}
+
+#mainImg {
+	margin-top: -30px;
+}
+
+#logoutDiv {
+	margin-top: -50px;
+	margin-bottom: 30px;
+	margin-right: 45px;
+}
+
+#btnDelete {
+	background-color: Red;
+}
+
+#btnCreate {
+	background-color: LimeGreen;
+}
+
+#lblnoresult {
+	color: Red;
+}

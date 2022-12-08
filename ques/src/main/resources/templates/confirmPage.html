@@ -1,0 +1,119 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>動態問卷前台 -回答確認頁</title>
+<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+<link rel="stylesheet" th:href="@{/css/confirmPage.css}" />
+<script th:src="@{/js/jquery-3.6.0.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:inline="javascript">
+var message = /*[[${succesfulMessage}]]*/"";
+if (message != null)
+	alert(message);
+
+const pageUrl = new URL(window.location.href);
+var questionnaireId = pageUrl.searchParams.get("ID");
+
+$(document).ready(function (){
+	var ansInfo = JSON.parse(sessionStorage.getItem('ansInfo'));
+	if(ansInfo == null){
+	    alert('請確認答案後再送出!!'); history.go(-1);
+	}
+	
+	$.ajax({
+        url: "/getQuestions/"+questionnaireId,
+        type: "GET",
+        dataType: 'json',   
+        success: function (result) {                           
+            if(result !== null){
+            	for (var i = 0; i < result.length; i++) {
+                	var userAns = result[i];               	
+                	var htmltitle = `<h5>第${i + 1}題：${userAns.questionTitle}</h5>`;
+                	if (ansInfo != null) {
+                    	for (var k = 0; k < ansInfo.length; k++) {                    	
+                       	 if (userAns.questionNumber == ansInfo[k].questionNumber) {
+                       		htmltitle += `<p>回答： ${ansInfo[k].answer}</p>`;
+                            break;
+                        	}
+                    	}
+                	}
+                	htmltitle += `<hr class="invisible"/>`;
+                	htmltitle += `</br></div >`;
+                	$("#quesAnswer").append(htmltitle);
+            	}
+            }
+        }
+    });
+})
+</script>
+</head>
+<body>
+	<div>
+		<input type="image" src="Pictures/75470.png" height="79px"
+			width="73px" />
+		<a href="listPage.html" th:href="@{/listPage}">前台問卷管理</a>|
+	</div>
+	<div class="container">
+		<div class="row">
+			<div class="firstDiv col-8">
+				<div id="titleDiv" class="col-2">
+					<h1>前台</h1>
+				</div>
+				<div class="col-6">
+					<span id="ltlState"
+						th:value="${questionnaires.questionnaireStates}==true ? '投票中': '已完結'"></span><br />
+					<small
+						th:text="'投票期間為 : ' + ${#dates.format(questionnaires.startDate, 'yyyy-MM-dd')} + '～' + ${#dates.format(questionnaires.endDate, 'yyyy-MM-dd')}"></small>
+				</div>
+			</div>
+			<div id="contentDiv" class="col-8">
+				<br>
+				<div>
+					<h2 align="center" th:text="${questionnaires.questionnaireTitle}"></h2>
+					<br>
+				</div>
+				<h4 th:text="${questionnaires.questionnaireBody}"></h4>
+				<small>◎ 活動完成後，將會進行抽獎，因此請注意基本資料請留真實資料，以及確認Email和手機號碼是否正確喔！</small>
+			</div>
+			<form th:action="@{/confirmPage}" method="post">
+				<div id="userInfoQuestion" class="col-8">
+					<br><br>
+                    <span>打 * 號者為必填(或必選)</span><br><br>					
+					<div class="form-group">
+						<span>(*)姓名: </span> <input th:value="${session.userInfo.name}"
+							type="text" ID="txtname" placeholder="輸入姓名" disabled="disabled">&emsp;<small>*請輸入中文姓名*</small>
+					</div>
+					<br/>
+					<div class="form-group">
+						<span>(*)手機:</span> <input th:value="${session.userInfo.phone}"
+							type="tel" ID="txtphone" placeholder="輸入手機號碼" disabled="disabled">&emsp;<small>*請輸入10位數字的號碼*</small>
+					</div>
+					<br/>
+					<div class="form-group">
+						<span>(*)Email:</span> <input th:value="${session.userInfo.email}"
+							type="email" ID="txtemail" placeholder="輸入信箱" disabled="disabled">&emsp;<small>*信箱應該包含@*</small>
+					</div>
+					<br/>
+					<div class="form-group">
+						<span>(*)年齡:</span> <input th:value="${session.userInfo.age}"
+							type="number" ID="txtage" placeholder="輸入年齡" disabled="disabled">&emsp;<small>*請輸入介於1~150之間*</small>
+					</div>
+			    <hr class="my-4 invisible">					
+			        <div id="quesAnswer">
+				     <br>
+				    </div>			
+			    </div>
+				<br>
+				<div align="right" id="btnSpace" class="col-2">
+				  <div class="col-8">
+				    <button type="submit" class="btn btn-primary" th:confirm-submit="|您確定要送出回答嗎？|"
+					   onclick="return confirm(this.getAttribute('confirm-submit'))" >送出</button>
+				    <a th:href="@{/formPage?ID=}+${questionnaires.questionnaireId}" ID="btnCancle" class="btn btn-danger" >取消</a>
+				  </div>
+				</div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>
